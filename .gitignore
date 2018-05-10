@@ -1,0 +1,19 @@
+# Dependency directories
+/node_modules
+/jspm_packages
+/bower_components
+
+
+# dotenv environment variables file(s)
+.env
+.env.*
+
+### WebStorm/IntelliJ ###
+/.idea
+modules.xml
+*.ipr
+*.iml
+
+
+### System Files ###
+.DS_Store
