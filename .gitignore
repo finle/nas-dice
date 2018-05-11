@@ -9,7 +9,7 @@
 .env.*
 
 ### WebStorm/IntelliJ ###
-.idea
+.idea/
 modules.xml
 *.ipr
 *.iml
