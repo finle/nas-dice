@@ -1,19 +1,54 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import styled from 'styled-components';
+
+import Header from 'components/Header/Header.js';
+import Pages from 'components/Pages/Pages.js';
+import Rollz from 'components/Rollz/Rollz.js';
+
+const AppWrapper = styled.div`
+  width: 100vw;
+  height: 100vh;
+  font-family: Roboto;
+  font-size: 16px;
+`;
+
+const Section = styled.div`
+  // height: 100%;
+  display: flex;
+`;
+
+const SectionPages = styled.div`
+  width: 60vw;
+  height: 100%;
+  padding: 2rem 1rem 2rem 2rem;
+`;
+
+const SectionRollz = styled.div`
+  width: 40vw;
+  height: 100%;
+  padding: 2rem 2rem 2rem 1rem;
+`;
+
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
+      <AppWrapper className="App">
+
+        <Header></Header>
+
+        <Section>
+          <SectionPages>
+            <Pages></Pages>
+          </SectionPages>
+
+          <SectionRollz>
+            <Rollz></Rollz>
+          </SectionRollz>
+        </Section>
+
+
+      </AppWrapper>
     );
   }
 }
