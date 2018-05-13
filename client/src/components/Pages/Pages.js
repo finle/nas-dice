@@ -15,11 +15,12 @@ const PaperStyled = styled(Paper)`
 
 const Heading = styled.div`
   font-size: 2rem;
+  padding-bottom 1.5rem;
 `;
 
 function TabContainer(props) {
   return (
-    <Typography component="div" style={{ padding: 8 * 3 }}>
+    <Typography component="div" style={{ padding: "1.5rem" }}>
       {props.children}
     </Typography>
   );
@@ -41,6 +42,9 @@ class Pages extends Component {
       <PagesWrapper className="Pages">
         <PaperStyled>
           {/* <Heading></Heading> */}
+          {value === 0 && <Heading>About NAS Dice</Heading>}
+          {value === 1 && <Heading>How to Play</Heading>}
+          {value === 2 && <Heading>Results</Heading>}
 
           <Tabs
             value={this.state.value}
@@ -49,14 +53,14 @@ class Pages extends Component {
             textColor="primary"
             // centered
           >
-            <Tab label="Item One" />
-            <Tab label="Item Two" />
-            <Tab label="Item Three" />
+            <Tab label="About NAS Dice" />
+            <Tab label="How to Play" />
+            <Tab label="Results" />
           </Tabs>
 
-          {value === 0 && <TabContainer>Item One</TabContainer>}
-          {value === 1 && <TabContainer>Item Two</TabContainer>}
-          {value === 2 && <TabContainer>Item Three</TabContainer>}
+          {value === 0 && <TabContainer>About NAS Dice</TabContainer>}
+          {value === 1 && <TabContainer>How to Play</TabContainer>}
+          {value === 2 && <TabContainer>Results</TabContainer>}
 
         </PaperStyled>
 

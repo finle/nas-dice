@@ -13,26 +13,31 @@ const PaperStyled = styled(Paper)`
   box-sizing: border-box;
 `;
 
-const Heading = styled.div`
+const Heading = styled.p`
+  margin: 0;
   font-size: 2rem;
   margin-bottom: 1rem;
 `;
 
-const SubHeading = styled.div`
+const SubHeading = styled.p`
+  margin: 0;
   font-size: 1.5rem;
   margin: 1rem 0;
 `;
 
 const BetAmountStyled = styled.div`
-  margin: 2rem 0;
+  margin: 3rem 0;
+  margin-left: 1rem;
+  margin-top: 2rem;
 `;
 
 const WinPercentageStyled = styled.div`
-  margin: 2rem 0;
+  margin: 3rem 0;
+  margin-left: 1rem;
 `;
 
 const YourOddsStyled = styled.div`
-  margin: 2rem 0;
+  margin-left: 1rem;
 `;
 
 const InputRangeStyled = styled.div`
@@ -73,11 +78,11 @@ class Rollz extends Component {
             </InputRangeStyled>
           </WinPercentageStyled>
 
+          <Heading style={{margin: "3rem 0 2rem 0"}}>Your Odds</Heading>
           <YourOddsStyled>
-            <Heading style={{ margin: "4rem 0 2rem 0" }}>Your Odds</Heading>
             <SubHeading>Roll under: {}</SubHeading>
-            <p>with a wager of: {}</p>
-            <p>for a profit of: {}</p>
+            <SubHeading>with a wager of: {}</SubHeading>
+            <SubHeading>for a profit of: {}</SubHeading>
           </YourOddsStyled>
 
         </PaperStyled>
