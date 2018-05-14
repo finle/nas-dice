@@ -2,7 +2,8 @@
 
 var NasDice = function() {
   // TODO: tracking a particular address's winnings/losings
-  // LocalContractStorage.defineMapProperty(this, "addressProfitMap");
+  // LocalContractStorage.defineMapProperty(this, "addressToRecentGames");
+  // LocalContractStorage.defineMapProperty(this, "addressToStats");
 
   // Defining smart contract state variables
   LocalContractStorage.defineProperties(this, {
@@ -18,6 +19,7 @@ var NasDice = function() {
     maxBet: null
   });
 
+
 };
 
 NasDice.prototype = {
@@ -28,15 +30,15 @@ NasDice.prototype = {
     this.owner = Blockchain.transaction.from;
     this.houseEdge = new BigNumber(980);
     this.houseEdgeDivisor = new BigNumber(1000);
-    // minimum bet initialized to .01 NAS
-    this.minBet = new BigNumber(Math.pow(10, 16));
+    // min and max bet initialized to .001 and 1 NAS respectively, can be configured in setters
+    this.minBet = new BigNumber(Math.pow(10, 15));
+    this.maxBet = new BigNumber(Math.pow(10, 19));
     // for statistics and metrics purposes
     this.gamesPlayed = new BigNumber(0);
     this.totalNasWager = new BigNumber(0);
     this.totalNasWon = new BigNumber(0);
     // game control
     this.gamePlayable = true;
-    this.maxBet = new BigNumber(Math.pow(10, 19));
   },
 
   // helper functions for wei and NAS conversion
@@ -84,7 +86,7 @@ NasDice.prototype = {
   },
   // getters
   getHouseCommission: function() {
-    return (this.houseEdge / this.houseEdgeDivisor);
+    return new BigNumber(1).minus((this.houseEdge / this.houseEdgeDivisor));
   },
   getMinBet: function() {
     return this.minBet;
@@ -99,19 +101,20 @@ NasDice.prototype = {
     return this.gamesPlayed;
   },
   getBalance: function() {
-    return this.balance;
+    return this._convertToNas(this.balance);
   },
   getTotalNasWager: function() {
-    return this.totalNasWager;
+    return this._convertToNas(this.totalNasWager);
   },
   getTotalNasWon: function() {
-    return this.totalNasWon;
+    return this._convertToNas(this.totalNasWon);
   },
   getMaxBet: function() {
     return this.maxBet;
   },
 
   // administrative functions
+  // this is weis
   withdraw: function(value) {
     this.isOwner();
     value = new BigNumber(value);
@@ -127,7 +130,14 @@ NasDice.prototype = {
   deposit: function() {
     this.balance = new BigNumber(new BigNumber(this.balance).plus(new BigNumber(Blockchain.transaction.value)));
   },
-
+  // keep in mind this function will reset the balance...
+  // this is in weis
+  withdrawAll: function(value) {
+    this.isOwner();
+    value = new BigNumber(value);
+    this._transfer(this.owner, value);
+    this.balance = new BigNumber(0);
+  },
 
   // NAS roll!
   nasRoll: function(rollUnder) {
@@ -139,7 +149,9 @@ NasDice.prototype = {
     this.isValidBet(bet);
     // roll die from 1 - 99
     var dieRoll = Math.floor(Math.random() * 100) + 1;
+    res['nasWager'] = this._convertToNas(bet);
     res['dieRoll'] = dieRoll;
+    res['timestamp'] = Blockchain.transaction.timestamp;
     var profit = new BigNumber((((100 - rollUnder) / (rollUnder - 1)) * bet * (this.houseEdge / this.houseEdgeDivisor)).toPrecision(15));
     this.isValidPayOut(profit);
     res['profit'] = this._convertToNas(profit);
@@ -157,6 +169,8 @@ NasDice.prototype = {
     this.totalNasWager = new BigNumber(this.totalNasWager).plus(bet);
     return res;
   },
+
+  // TODO: metrics and statistics functions
 
   // validators
   isGamePlayable: function() {

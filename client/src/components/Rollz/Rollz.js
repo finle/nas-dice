@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import Paper from 'material-ui/Paper';
+import NebPay from 'nebpay';
 
+import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
 
 // 1)
@@ -67,36 +69,67 @@ const calculateProfit = (rollUnder, bet) => {
   // 2)
   // divide by 10 because the slider actual values are x10
   // see comment 1) above
-  const profit = new BigNumber(((((100 - rollUnder) / (rollUnder - 1)) * bet * (houseEdge / houseEdgeDivisor)).toPrecision(15)) / 10);
+
+  //kevin: no more divide by 10, removed bet slider
+  const profit = new BigNumber(((((100 - rollUnder) / (rollUnder - 1)) * bet * (houseEdge / houseEdgeDivisor)).toPrecision(15)));
   return profit.toString();
 };
 
+const nebPay = new NebPay();
+
+
 class Rollz extends Component {
   state = {
+    minBet: 0.01,
+    betError: false,
     betValue: 1,
     winValue: 1,
+  };
+
+  handleBetChange = name => event => {
+    if (parseFloat(event.target.value) < this.state.minBet) {
+      this.setState({
+        betError: true,
+        betValue: event.target.value
+      })
+    } else {
+      this.setState({
+        betValue: event.target.value,
+        betError: false
+      });
+    }
+  };
+
+  onClickCallNasRollDapp = () => {
+    let smartContract = "n22oTEArMVWCfJgDcX3ktyDU6P9xGT4mvL1";
+    let bet = this.state.betValue;
+    let callFunction = "nasRoll";
+    let callArgs = "[\"" + String(this.state.winValue + 1) + "\"]";
+    nebPay.call(smartContract, bet, callFunction, callArgs, {
+      listener: this.cbCallNasRollDapp
+    });
+  };
+
+  cbCallNasRollDapp = (res) => {
+    console.log("callback res: " + JSON.stringify(res));
   };
 
   render() {
     return (
       <RollzWrapper className="Rollz">
         <PaperStyled>
-          <Heading>Choose Your Bet</Heading>
+          <Heading>Place Dice Bets</Heading>
 
           <BetAmountStyled>
-            <SubHeading>Bet Amount: {this.state.betValue / 10}</SubHeading>
-            <InputRangeStyled>
-              <InputRange
-                formatLabel={value => `${value / 10} NAS`}
-                step={1}
-                maxValue={10}
-                minValue={1}
-                value={this.state.betValue}
-                onChange={(betValue) => {
-                  this.setState({ betValue });
-                  console.log("betValue is", this.state.betValue / 10);
-                }} />
-            </InputRangeStyled>
+            <TextField
+              label="Bet Amount"
+              value={this.state.betValue}
+              onChange={this.handleBetChange()}
+              type="number"
+              helperText={"Minimum bet: " + this.state.minBet + " NAS"}
+              margin="dense"
+              error={this.state.betError}
+            />
           </BetAmountStyled>
 
           <WinPercentageStyled>
@@ -113,10 +146,23 @@ class Rollz extends Component {
           <Heading style={{margin: "3rem 0 2rem 0"}}>Your Odds</Heading>
           <YourOddsStyled>
             <SubHeading>Roll under: {this.state.winValue + 1}</SubHeading>
-            <SubHeading>with a wager of: {this.state.betValue / 10}</SubHeading>
+            <SubHeading>with a wager of: {this.state.betValue}</SubHeading>
             <SubHeading>
               for a profit of: {calculateProfit(this.state.winValue + 1, this.state.betValue)}
             </SubHeading>
+            {this.state.betError === true ? (
+              <Button
+                variant="raised"
+                color="primary"
+                disabled>Roll!
+              </Button>
+            ) : (
+              <Button
+                variant="raised"
+                color="primary"
+                onClick={this.onClickCallNasRollDapp}>Roll!
+              </Button>
+            )}
           </YourOddsStyled>
 
         </PaperStyled>
