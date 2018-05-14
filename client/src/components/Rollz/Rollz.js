@@ -1,7 +1,16 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import Paper from 'material-ui/Paper';
+
+import Button from 'material-ui/Button';
+
+
+// input range does not handle floating point numbers in the display well
+// so we let react-input-range use integers,
+// but display on the UI the floating point number
+// by using formatLabel
 import InputRange from 'react-input-range';
+import { BigNumber } from 'bignumber.js';
 
 import 'react-input-range/lib/css/index.css';
 
@@ -44,9 +53,24 @@ const InputRangeStyled = styled.div`
   margin: 2rem 1rem;
 `;
 
+// expected values
+// Roll under 49
+// with a wager of 5 eth
+// for a profit of +5.20625000000000 eth
+// but my profit is BigNumber { s: 1, e: 0, c: [ 5, 20625000000000 ] }
+const calculateProfit = (rollUnder, bet) => {
+  // BigNumber.config({ DECIMAL_PLACES: 15, ROUNDING_MODE: 4 })
+  rollUnder = new BigNumber(rollUnder);
+  bet = new BigNumber(bet);
+  const houseEdge = new BigNumber(980);
+  const houseEdgeDivisor = new BigNumber(1000);
+  const profit = new BigNumber((((100 - rollUnder) / (rollUnder - 1)) * bet * (houseEdge / houseEdgeDivisor)).toPrecision(15));
+  return profit.toString();
+};
+
 class Rollz extends Component {
   state = {
-    betValue: 0.1,
+    betValue: 1,
     winValue: 1,
   };
 
@@ -57,13 +81,18 @@ class Rollz extends Component {
           <Heading>Choose Your Bet</Heading>
 
           <BetAmountStyled>
-            <SubHeading>Bet Amount: {this.state.betValue}</SubHeading>
+            <SubHeading>Bet Amount: {this.state.betValue / 10}</SubHeading>
             <InputRangeStyled>
               <InputRange
-                maxValue={100}
-                minValue={0}
+                formatLabel={value => `${value / 10} NAS`}
+                step={1}
+                maxValue={10}
+                minValue={1}
                 value={this.state.betValue}
-                onChange={betValue => this.setState({ betValue })} />
+                onChange={(betValue) => {
+                  this.setState({ betValue });
+                  console.log("betValue is", this.state.betValue / 10);
+                }} />
             </InputRangeStyled>
           </BetAmountStyled>
 
@@ -81,8 +110,11 @@ class Rollz extends Component {
           <Heading style={{margin: "3rem 0 2rem 0"}}>Your Odds</Heading>
           <YourOddsStyled>
             <SubHeading>Roll under: {this.state.winValue + 1}</SubHeading>
-            <SubHeading>with a wager of: {}</SubHeading>
-            <SubHeading>for a profit of: {}</SubHeading>
+            <SubHeading>with a wager of: {this.state.betValue}</SubHeading>
+            <SubHeading>
+              for a profit of:
+              {calculateProfit(this.state.winValue, this.state.betValue)}
+            </SubHeading>
           </YourOddsStyled>
 
         </PaperStyled>
