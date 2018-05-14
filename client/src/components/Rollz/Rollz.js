@@ -46,8 +46,8 @@ const InputRangeStyled = styled.div`
 
 class Rollz extends Component {
   state = {
-    betValue: 0,
-    winValue: 0,
+    betValue: 0.1,
+    winValue: 1,
   };
 
   render() {
@@ -71,8 +71,8 @@ class Rollz extends Component {
             <SubHeading>Win Percentage: {this.state.winValue}</SubHeading>
             <InputRangeStyled>
               <InputRange
-                maxValue={100}
-                minValue={0}
+                maxValue={98}
+                minValue={1}
                 value={this.state.winValue}
                 onChange={winValue => this.setState({ winValue })} />
             </InputRangeStyled>
@@ -80,7 +80,7 @@ class Rollz extends Component {
 
           <Heading style={{margin: "3rem 0 2rem 0"}}>Your Odds</Heading>
           <YourOddsStyled>
-            <SubHeading>Roll under: {}</SubHeading>
+            <SubHeading>Roll under: {this.state.winValue + 1}</SubHeading>
             <SubHeading>with a wager of: {}</SubHeading>
             <SubHeading>for a profit of: {}</SubHeading>
           </YourOddsStyled>
