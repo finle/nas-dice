@@ -4,7 +4,7 @@ import Paper from 'material-ui/Paper';
 
 import Button from 'material-ui/Button';
 
-
+// 1)
 // input range does not handle floating point numbers in the display well
 // so we let react-input-range use integers,
 // but display on the UI the floating point number
@@ -64,7 +64,10 @@ const calculateProfit = (rollUnder, bet) => {
   bet = new BigNumber(bet);
   const houseEdge = new BigNumber(980);
   const houseEdgeDivisor = new BigNumber(1000);
-  const profit = new BigNumber((((100 - rollUnder) / (rollUnder - 1)) * bet * (houseEdge / houseEdgeDivisor)).toPrecision(15));
+  // 2)
+  // divide by 10 because the slider actual values are x10
+  // see comment 1) above
+  const profit = new BigNumber(((((100 - rollUnder) / (rollUnder - 1)) * bet * (houseEdge / houseEdgeDivisor)).toPrecision(15)) / 10);
   return profit.toString();
 };
 
@@ -110,10 +113,9 @@ class Rollz extends Component {
           <Heading style={{margin: "3rem 0 2rem 0"}}>Your Odds</Heading>
           <YourOddsStyled>
             <SubHeading>Roll under: {this.state.winValue + 1}</SubHeading>
-            <SubHeading>with a wager of: {this.state.betValue}</SubHeading>
+            <SubHeading>with a wager of: {this.state.betValue / 10}</SubHeading>
             <SubHeading>
-              for a profit of:
-              {calculateProfit(this.state.winValue, this.state.betValue)}
+              for a profit of: {calculateProfit(this.state.winValue + 1, this.state.betValue)}
             </SubHeading>
           </YourOddsStyled>
 
