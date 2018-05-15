@@ -127,21 +127,9 @@ class Rollz extends Component {
     });
   };
 
-  onClickBetButtonAmountMin = () => {
+  onClickBetButtonAmount = (bet) => {
     this.setState({
-      betValue: this.state.minBet
-    })
-  };
-
-  onClickBetButtonAmountHalfNas = () => {
-    this.setState({
-      betValue: 0.5
-    })
-  };
-
-  onClickBetButtonAmountOneNas = () => {
-    this.setState({
-      betValue: 1.0
+      betValue: bet
     })
   };
 
@@ -163,24 +151,23 @@ class Rollz extends Component {
               error={this.state.betError}/>
             <div>
               <Button
-                id="bet-button-min"
                 variant="raised"
                 color="primary"
                 style={{marginRight: '.5rem'}}
-                onClick={this.onClickBetButtonAmountMin}>
+                onClick={() => this.onClickBetButtonAmount(this.state.minBet)}>
                 Min
               </Button>
               <Button
                 variant="raised"
                 color="primary"
-                onClick={this.onClickBetButtonAmountHalfNas}
+                onClick={() => this.onClickBetButtonAmount(0.5)}
                 style={{margin: '.5rem',}}>
                 .5 NAS
               </Button>
               <Button
                 variant="raised"
                 color="primary"
-                onClick={this.onClickBetButtonAmountOneNas}
+                onClick={() => this.onClickBetButtonAmount(1.0)}
                 style={{margin: '.5rem',}}>
                 1.0 NAS
               </Button>
