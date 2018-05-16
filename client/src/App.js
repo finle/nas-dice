@@ -31,6 +31,24 @@ const SectionRollz = styled.div`
 
 
 class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      rollResults: {
+        isWinner: null,
+        dieRoll: null,
+        profit: null,
+        timestamp: null
+      }
+    };
+    this.changeRollResults = this.changeRollResults.bind(this);
+  }
+
+  changeRollResults = (rollResults) => {
+    this.setState({
+      rollResults: rollResults
+    })
+  };
   render() {
     return (
       <AppWrapper className="App">
@@ -39,11 +57,15 @@ class App extends Component {
 
         <Section>
           <SectionPages>
-            <Pages></Pages>
+            <Pages
+              rollResults={this.state.rollResults}
+              changeRollResults={this.changeRollResults} />
           </SectionPages>
 
           <SectionRollz>
-            <Rollz></Rollz>
+            <Rollz
+              rollResults={this.state.rollResults}
+              changeRollResults={this.changeRollResults} />
           </SectionRollz>
         </Section>
 

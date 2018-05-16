@@ -33,7 +33,7 @@ const Heading = styled.p`
 
 const SubHeading = styled.p`
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   margin: 1rem 0;
 `;
 
@@ -60,6 +60,10 @@ const InputRangeStyled = styled.div`
   margin: 2rem 1rem;
 `;
 
+const ResultsStyled = styled.div`
+  margin: 1rem 1rem;
+`;
+
 // expected values
 // Roll under 49
 // with a wager of 5 eth
@@ -82,8 +86,26 @@ const calculateProfit = (rollUnder, bet) => {
 
 const nebPay = new NebPay();
 
+const neb = new Neb.Neb();
+neb.setRequest(new Neb.HttpRequest("https://testnet.nebulas.io"));
+
+let timeConverter = (UNIX_timestamp) => {
+  let a = new Date(UNIX_timestamp * 1000);
+  let months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let year = a.getFullYear();
+  let month = months[a.getMonth()];
+  let date = a.getDate();
+  let hour = a.getHours();
+  let min = a.getMinutes();
+  let sec = a.getSeconds();
+  let time = `${month} ${date} ${year} ${hour}:${min}:${sec}`;
+  return time;
+};
 
 class Rollz extends Component {
+  constructor(props) {
+    super(props);
+  };
   state = {
     minBet: 0.01,
     maxBet: 10.0,
@@ -91,6 +113,8 @@ class Rollz extends Component {
     betValue: 0.01,
     winValue: 50,
   };
+
+  changeRollResults = this.props.changeRollResults;
 
   handleBetChange = name => event => {
     if ((parseFloat(event.target.value) < this.state.minBet) || (parseFloat(event.target.value) > this.state.maxBet)) {
@@ -119,18 +143,39 @@ class Rollz extends Component {
   nasRollCallBack = (res) => {
     console.log("callback res: " + JSON.stringify(res));
     let txHash = res.txhash;
-    let neb = new Neb.Neb();
-    neb.setRequest(new Neb.HttpRequest("https://testnet.nebulas.io"));
-    neb.api.getTransactionReceipt({hash: "561aae39e3830a4947f1be3f51561a0990ad6c2d5653aecd92492575fb760b71"})
-      .then(function(receipt) {
-        console.log("the response from getTransaction: ",receipt);
-    });
+    //let neb = new Neb.Neb();
+    //neb.setRequest(new Neb.HttpRequest("https://testnet.nebulas.io"));
+    //neb.api.getTransactionReceipt({hash: "561aae39e3830a4947f1be3f51561a0990ad6c2d5653aecd92492575fb760b71"})
+    //neb.api.getTransactionReceipt({hash: txHash})
+    //  .then(function(receipt) {
+    //    console.log("the response from getTransaction: ", receipt);
+    //  });
+    let funcIntervalQuery = () => {
+      neb.api.getTransactionReceipt({hash: txHash})
+        .then(function(receipt) {
+          if (receipt.status === 1) {
+            console.log("final result: ", receipt);
+            let rollResults = JSON.parse(receipt.execute_result);
+            this.changeRollResults(rollResults);
+            clearInterval(intervalQuery);
+          } else if (receipt.status === 0) {
+            console.log("something went wrong", receipt);
+            clearInterval(intervalQuery);
+          }
+        }.bind(this));
+    };
+    let intervalQuery = setInterval( () => {
+      funcIntervalQuery();
+    }, 5000);
   };
+
+
 
   onClickBetButtonAmount = (bet) => {
     this.setState({
       betValue: bet
-    })
+    });
+    this.props.changeRollResults("bich pls");
   };
 
   render() {
@@ -175,7 +220,7 @@ class Rollz extends Component {
           </BetAmountStyled>
 
           <WinPercentageStyled>
-            <SubHeading>Win Percentage: {this.state.winValue}</SubHeading>
+            <SubHeading>Win Percentage: {this.state.winValue} %</SubHeading>
             <InputRangeStyled>
               <InputRange
                 maxValue={98}
@@ -185,13 +230,14 @@ class Rollz extends Component {
             </InputRangeStyled>
           </WinPercentageStyled>
 
-          <Heading style={{margin: "3rem 0 2rem 0"}}>Your Odds</Heading>
+          <Heading>Your Odds</Heading>
           <YourOddsStyled>
             <SubHeading>Roll under: {this.state.winValue + 1}</SubHeading>
-            <SubHeading>with a wager of: {this.state.betValue}</SubHeading>
+            <SubHeading>With wager: {this.state.betValue} NAS</SubHeading>
             <SubHeading>
-              for a profit of: {calculateProfit(this.state.winValue + 1, this.state.betValue)}
+              Profit: {calculateProfit(this.state.winValue + 1, this.state.betValue)} NAS
             </SubHeading>
+            <div>
             {this.state.betError === true ? (
               <Button
                 variant="raised"
@@ -202,10 +248,37 @@ class Rollz extends Component {
               <Button
                 variant="raised"
                 color="primary"
-                onClick={this.onClickCallNasRollDapp}>Roll!
+                onClick={this.onClickCallNasRollDapp}
+                style={{marginBottom: '1rem',}}>Roll!
               </Button>
             )}
+            <Button
+              variant="raised"
+              color="primary"
+              style={{marginBottom: '1rem', marginLeft: '1rem'}}>Simulate Roll
+            </Button>
+            </div>
           </YourOddsStyled>
+          <Heading>Results</Heading>
+          <ResultsStyled>
+          {this.props.rollResults.isWinner === true ? (
+            <div>
+              <SubHeading>You won :-)</SubHeading>
+              <SubHeading>+{this.props.rollResults.profit} NAS </SubHeading>
+            </div>
+          ) : (
+            <SubHeading>You lost :-(</SubHeading>
+          )}
+          {this.props.rollResults.dieRoll === null ? (
+            <div>
+              <SubHeading>You rolled: Not yet rolled</SubHeading>
+            </div>
+          ) : (
+            <SubHeading>You rolled: {this.props.rollResults.dieRoll}</SubHeading>
+          )}
+          <SubHeading>Roll time: {timeConverter(this.props.rollResults.timestamp)}</SubHeading>
+          </ResultsStyled>
+
 
         </PaperStyled>
       </RollzWrapper>
