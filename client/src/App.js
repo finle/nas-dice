@@ -31,14 +31,15 @@ const SectionRollz = styled.div`
 
 
 class App extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       rollResults: {
         isWinner: null,
         dieRoll: null,
         profit: null,
-        timestamp: null
+        timestamp: null,
+        error: null
       }
     };
     this.changeRollResults = this.changeRollResults.bind(this);
