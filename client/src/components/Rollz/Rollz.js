@@ -110,7 +110,6 @@ class Rollz extends Component {
     betValue: 0.01,
     winValue: 50,
   };
-
   changeRollResults = this.props.changeRollResults.bind(this);
 
   displayRollResults = () => {
@@ -228,6 +227,24 @@ class Rollz extends Component {
     });
   };
 
+  getMinimumBet = () => {
+    let bet = 0;
+    let callFunction = "getMinBet";
+    let callArgs = "[\"\"]";
+    nebPay.simulateCall(smartContract, bet, callFunction, callArgs, {
+      listener: this.getMinimumBetCallBack
+    });
+  };
+
+  getMinimumBetCallBack = (res) => {
+    console.log("callback res: " + JSON.stringify(res));
+    let minBetResult = res.result;
+    console.log(minBetResult);
+    this.setState({
+      minBet: minBetResult
+    })
+  };
+
   render() {
     return (
       <RollzWrapper className="Rollz">
@@ -240,7 +257,7 @@ class Rollz extends Component {
               value={this.state.betValue}
               onChange={this.handleBetChange()}
               type="number"
-              helperText={"Minimum bet: " + this.state.minBet + " NAS"}
+              helperText={"Minimum bet: " + this.getMinimumBet() + " NAS"}
               margin="dense"
               InputProps={{inputProps: {min: 0.01, max: 10, step: 0.1}}}
               error={this.state.betError}/>
