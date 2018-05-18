@@ -6,7 +6,6 @@ import Neb from 'nebulas';
 
 import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
-import utf8 from 'utf8';
 
 // 1)
 // input range does not handle floating point numbers in the display well
@@ -62,7 +61,7 @@ const ResultsStyled = styled.div`
   font-size: 1.4rem;
 `;
 
-const smartContract = "n22oTEArMVWCfJgDcX3ktyDU6P9xGT4mvL1";
+const smartContract = "n1ump1QJZS8JRcwXN7tYgMcEizSvwphYQo4";
 const testnetAddress = "https://testnet.nebulas.io";
 // expected values
 // Roll under 49
@@ -104,10 +103,10 @@ let timeConverter = (UNIX_timestamp) => {
 
 class Rollz extends Component {
   state = {
-    minBet: 0.01,
+    minBet: null,
     maxBet: 10.0,
     betError: false,
-    betValue: 0.01,
+    betValue: 0.001,
     winValue: 50,
   };
   changeRollResults = this.props.changeRollResults.bind(this);
@@ -180,8 +179,6 @@ class Rollz extends Component {
   };
 
   simulateNasRollCallBack = (res) => {
-    console.log("simulate callback res: " + JSON.stringify(res));
-    console.log(res);
     try {
       var simulateResults = JSON.parse(res.result);
     } catch(err) {
@@ -191,15 +188,11 @@ class Rollz extends Component {
       this.changeRollResults(updatedRollResults);
       return
     }
-
     this.changeRollResults(simulateResults);
     console.log(this.props.rollResults);
-
-
   };
 
   nasRollCallBack = (res) => {
-    console.log("callback res: " + JSON.stringify(res));
     let txHash = res.txhash;
     let funcIntervalQuery = () => {
       neb.api.getTransactionReceipt({hash: txHash})
@@ -216,7 +209,7 @@ class Rollz extends Component {
           }
         }.bind(this));
     };
-    let intervalQuery = setInterval( () => {
+    let intervalQuery = setInterval(() => {
       funcIntervalQuery();
     }, 5000);
   };
@@ -227,7 +220,7 @@ class Rollz extends Component {
     });
   };
 
-  getMinimumBet = () => {
+  getMinimumBet() {
     let bet = 0;
     let callFunction = "getMinBet";
     let callArgs = "[\"\"]";
@@ -237,13 +230,15 @@ class Rollz extends Component {
   };
 
   getMinimumBetCallBack = (res) => {
-    console.log("callback res: " + JSON.stringify(res));
-    let minBetResult = res.result;
-    console.log(minBetResult);
+    let minBetResult = res.result.replace(/["]+/g, '');
     this.setState({
       minBet: minBetResult
     })
   };
+
+  componentDidMount() {
+    this.getMinimumBet();
+  }
 
   render() {
     return (
@@ -257,9 +252,9 @@ class Rollz extends Component {
               value={this.state.betValue}
               onChange={this.handleBetChange()}
               type="number"
-              helperText={"Minimum bet: " + this.getMinimumBet() + " NAS"}
+              helperText={"Minimum bet: " + this.state.minBet + " NAS"}
               margin="dense"
-              InputProps={{inputProps: {min: 0.01, max: 10, step: 0.1}}}
+              InputProps={{inputProps: {min: 0.001, max: 10, step: 0.1}}}
               error={this.state.betError}/>
             <div>
               <Button

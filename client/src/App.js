@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import Header from 'components/Header/Header.js';
 import Pages from 'components/Pages/Pages.js';
 import Rollz from 'components/Rollz/Rollz.js';
+import InfoBar from 'components/InfoBar/InfoBar.js';
 
 const AppWrapper = styled.div`
   width: 100vw;
@@ -55,6 +56,8 @@ class App extends Component {
       <AppWrapper className="App">
 
         <Header></Header>
+
+        <InfoBar></InfoBar>
 
         <Section>
           <SectionPages>

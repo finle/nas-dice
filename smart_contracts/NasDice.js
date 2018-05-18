@@ -89,7 +89,7 @@ NasDice.prototype = {
     return new BigNumber(1).minus((this.houseEdge / this.houseEdgeDivisor));
   },
   getMinBet: function() {
-    return this.minBet;
+    return this._convertToNas(this.minBet);
   },
   getOwner: function() {
     return this.owner;
@@ -110,7 +110,7 @@ NasDice.prototype = {
     return this._convertToNas(this.totalNasWon);
   },
   getMaxBet: function() {
-    return this.maxBet;
+    return this._convertToNas(this.maxBet);
   },
 
   // administrative functions
@@ -175,7 +175,7 @@ NasDice.prototype = {
   // validators
   isGamePlayable: function() {
     if (this.gamePlayable === 'false' || this.gamePlayable === false) {
-      throw new Error("NAS dice is currenntly not in playable mode");
+      throw new Error("NAS dice is currently not in playable mode");
     }
   },
   isValidBet: function(bet) {
