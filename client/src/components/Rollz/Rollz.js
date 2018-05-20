@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import Paper from 'material-ui/Paper';
 import NebPay from 'nebpay';
 import Neb from 'nebulas';
+import ReactDice from 'react-dice-complete';
+import 'react-dice-complete/dist/react-dice-complete.css';
 
 import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
@@ -61,15 +63,12 @@ const ResultsStyled = styled.div`
   font-size: 1.4rem;
 `;
 
-const smartContract = "n1ump1QJZS8JRcwXN7tYgMcEizSvwphYQo4";
-const testnetAddress = "https://testnet.nebulas.io";
 // expected values
 // Roll under 49
 // with a wager of 5 eth
 // for a profit of +5.20625000000000 eth
 // but my profit is BigNumber { s: 1, e: 0, c: [ 5, 20625000000000 ] }
 const calculateProfit = (rollUnder, bet) => {
-  // BigNumber.config({ DECIMAL_PLACES: 15, ROUNDING_MODE: 4 })
   rollUnder = new BigNumber(rollUnder);
   bet = new BigNumber(bet);
   const houseEdge = new BigNumber(980);
@@ -84,9 +83,8 @@ const calculateProfit = (rollUnder, bet) => {
 };
 
 const nebPay = new NebPay();
-
 const neb = new Neb.Neb();
-neb.setRequest(new Neb.HttpRequest(testnetAddress));
+neb.setRequest(new Neb.HttpRequest("https://mainnet.nebulas.io"));
 
 let timeConverter = (UNIX_timestamp) => {
   let a = new Date(UNIX_timestamp * 1000);
@@ -103,12 +101,15 @@ let timeConverter = (UNIX_timestamp) => {
 
 class Rollz extends Component {
   state = {
-    minBet: null,
+    minBet: 0.001,
     maxBet: 10.0,
     betError: false,
     betValue: 0.001,
     winValue: 50,
+    rolling: false
   };
+  smartContract = this.props.smartContract;
+  networkURL = this.props.networkURL;
   changeRollResults = this.props.changeRollResults.bind(this);
 
   displayRollResults = () => {
@@ -164,7 +165,7 @@ class Rollz extends Component {
     let bet = this.state.betValue;
     let callFunction = "nasRoll";
     let callArgs = "[\"" + String(this.state.winValue + 1) + "\"]";
-    nebPay.call(smartContract, bet, callFunction, callArgs, {
+    nebPay.call(this.smartContract, bet, callFunction, callArgs, {
       listener: this.nasRollCallBack
     });
   };
@@ -173,27 +174,72 @@ class Rollz extends Component {
     let bet = this.state.betValue;
     let callFunction = "nasRoll";
     let callArgs = "[\"" + String(this.state.winValue + 1) + "\"]";
-    nebPay.simulateCall(smartContract, bet, callFunction, callArgs, {
-      listener: this.simulateNasRollCallBack
+    this.setState({
+      rolling: true
     });
+    if (this.props.webExtension) {
+      nebPay.simulateCall(this.smartContract, bet, callFunction, callArgs, {
+        listener: this.simulateNasRollCallBack
+      });
+    } else {
+      neb.api
+        .call({
+          from: this.smartContract,
+          to: this.smartContract,
+          value: bet * Math.pow(10, 18),
+          nonce: 1,
+          gasPrice: 1000000,
+          gasLimit: 2000000,
+          contract: {
+            function: callFunction,
+            args: callArgs
+          }
+        })
+        .then((res) => {
+          try {
+            var simulateResults = JSON.parse(res.result);
+          } catch(err) {
+            var simulateResults = this.returnResetRollResults();
+            console.log(simulateResults);
+            simulateResults["error"] = res.execute_err;
+          }
+          this.setState({
+            rolling: false
+          });
+          this.changeRollResults(simulateResults);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+
+  returnResetRollResults = () => {
+    let res = Object.assign({}, this.props.rollResults);
+    Object.keys(res).forEach((key) => res[key] = null);
+    return res;
   };
 
   simulateNasRollCallBack = (res) => {
     try {
       var simulateResults = JSON.parse(res.result);
     } catch(err) {
-      let updatedRollResults = Object.assign({}, this.props.rollResults);
-      updatedRollResults["error"] = res.execute_err;
-      console.log(updatedRollResults);
-      this.changeRollResults(updatedRollResults);
-      return
+      var simulateResults = this.returnResetRollResults();
+      console.log(simulateResults);
+      simulateResults["error"] = res.execute_err;
     }
+    this.setState({
+      rolling: false
+    });
     this.changeRollResults(simulateResults);
     console.log(this.props.rollResults);
   };
 
   nasRollCallBack = (res) => {
     let txHash = res.txhash;
+    this.setState({
+      rolling: true
+    });
     let funcIntervalQuery = () => {
       neb.api.getTransactionReceipt({hash: txHash})
         .then(function(receipt) {
@@ -202,6 +248,9 @@ class Rollz extends Component {
             console.log("final result: ", receipt);
             let rollResults = JSON.parse(receipt.execute_result);
             this.changeRollResults(rollResults);
+            this.setState({
+              rolling: false
+            });
             clearInterval(intervalQuery);
           } else if (receipt.status === 0) {
             console.log("something went wrong", receipt);
@@ -221,12 +270,32 @@ class Rollz extends Component {
   };
 
   getMinimumBet() {
-    let bet = 0;
     let callFunction = "getMinBet";
     let callArgs = "[\"\"]";
-    nebPay.simulateCall(smartContract, bet, callFunction, callArgs, {
+    neb.api
+      .call({
+        from: this.smartContract,
+        to: this.smartContract,
+        value: 0,
+        nonce: 1,
+        gasPrice: 1000000,
+        gasLimit: 2000000,
+        contract: {
+          function: callFunction,
+          args: callArgs
+        }
+      })
+      .then((res) => {
+        let minBetResult = res.result.replace(/["]+/g, '');
+        this.setState({
+          minBet: minBetResult
+        })
+      })
+
+    /*nebPay.simulateCall(smartContract, bet, callFunction, callArgs, {
       listener: this.getMinimumBetCallBack
     });
+    */
   };
 
   getMinimumBetCallBack = (res) => {
@@ -323,6 +392,20 @@ class Rollz extends Component {
             </div>
           </YourOddsStyled>
           <Heading>Results</Heading>
+          {this.state.rolling &&
+            <div>
+              <p style={{marginLeft: "1rem"}}>Currently rolling...</p>
+              <ReactDice
+                rollDone={() => {
+                }}
+                numDice={4}
+                dieSize={50}
+                faceColor={"#000000"}
+                dotColor={"white"}
+                rollTime={2}
+              />
+            </div>
+          }
           {this.displayRollResults()}
         </PaperStyled>
       </RollzWrapper>

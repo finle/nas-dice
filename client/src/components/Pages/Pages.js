@@ -9,7 +9,7 @@ const PagesWrapper = styled.div`
 `;
 
 const PaperStyled = styled(Paper)`
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 3rem 1rem;
   box-sizing: border-box;
 `;
 
@@ -43,8 +43,8 @@ class Pages extends Component {
       <PagesWrapper className="Pages">
         <PaperStyled>
           {/* <Heading></Heading> */}
-          {value === 0 && <Heading>About NAS Dice</Heading>}
-          {value === 1 && <Heading>How to Play</Heading>}
+          {value === 0 && <Heading>How To Play</Heading>}
+          {value === 1 && <Heading>About NAS Dice</Heading>}
 
           <Tabs
             value={this.state.value}
@@ -53,12 +53,21 @@ class Pages extends Component {
             textColor="primary"
             // centered
           >
+            <Tab label="How To Play" />
             <Tab label="About NAS Dice" />
-            <Tab label="How to Play" />
           </Tabs>
 
-          {value === 0 && <TabContainer>About NAS Dice</TabContainer>}
-          {value === 1 && <TabContainer>How to Play</TabContainer>}
+          {value === 1 && <TabContainer>
+            <li>This game was created as part of the Nebulas Incentive program. <a target="_blank" href="https://incentive.nebulas.io/signup.html?invite=PQe3y">Participate today and get 100 NAS free!</a></li>
+            <li>NAS Dice is a betting game where you roll under a certain number from 2 to 99.</li>
+            <li>Your NAS rewards significantly increase as you decrease your win percentage.</li>
+          </TabContainer>}
+          {value === 0 && <TabContainer>
+            <li>Follow instructions and install the NAS Web Wallet at this <a href="https://github.com/ChengOrangeJu/WebExtensionWallet" target="_blank">link</a>. You can create a wallet in the Chrome extension.</li>
+            <li>Game is currently only supported in Google Chrome.</li>
+            <li>Make sure to have NAS in your wallet. You can get some small amounts at this <a href="http://www.givemenas.com/home.html" target="_blank">faucet</a> or buy at <a href="https://coinmarketcap.com/currencies/nebulas-token/#markets" target="_blank">exchanges</a></li>
+
+          </TabContainer>}
 
         </PaperStyled>
 
