@@ -112,6 +112,63 @@ class Rollz extends Component {
   networkURL = this.props.networkURL;
   changeRollResults = this.props.changeRollResults.bind(this);
 
+  displayNewRollResults = () => {
+    let elements = [];
+    if (this.props.rollResults.error != null) {
+      var errorMessage = `Error: ${this.props.rollResults.error}`
+      elements.push(
+        <ResultsStyled style={{color: "red"}}>{errorMessage}</ResultsStyled>
+      )
+    }
+    if (this.props.rollResults.isWinner != null) {
+      var outcomeMessage = (this.props.rollResults.isWinner === true ? `You won ${this.props.rollResults.profit} NAS! 😉` : "You lost 😢");
+      elements.push(
+        <ResultsStyled>
+          {"Outcome: "}
+          <span
+            style={{
+              color: this.props.rollResults.isWinner === true ? "green" : "red"
+            }}>{outcomeMessage}
+          </span>
+        </ResultsStyled>
+      )
+    } else {
+      elements.push(
+        <ResultsStyled>Outcome: </ResultsStyled>
+      )
+    }
+    if (this.props.rollResults.dieRoll != null) {
+      var rollMessage = this.props.rollResults.dieRoll;
+      elements.push(
+        <ResultsStyled>
+          {"You rolled: "}
+          <span
+            style={{
+              color: this.props.rollResults.isWinner === true ? "green" : "red"
+            }}>{rollMessage}
+          </span>
+        </ResultsStyled>
+      )
+    } else {
+      rollMessage = "You rolled: ";
+      elements.push(
+        <ResultsStyled>{rollMessage}</ResultsStyled>
+      )
+    }
+    if (this.props.rollResults.timestamp != null) {
+      var timeStampMessage = "Roll time: " + timeConverter(this.props.rollResults.timestamp);
+    } else {
+      timeStampMessage = "Roll time: ";
+    }
+    elements.push(
+      <ResultsStyled>{timeStampMessage}</ResultsStyled>
+    )
+    return (
+      <div>
+        {elements}
+      </div>
+    )
+  }
   displayRollResults = () => {
     let elements = [];
     if (this.props.rollResults.error != null) {
@@ -397,7 +454,7 @@ class Rollz extends Component {
               />
             </div>
           }
-          {this.displayRollResults()}
+          {this.displayNewRollResults()}
         </PaperStyled>
       </RollzWrapper>
     );
