@@ -60,9 +60,7 @@ class InfoBar extends Component {
         if (xmlHttp.readyState === 4) {
           if (xmlHttp.status === 200) {
             let response = JSON.parse(xmlHttp.responseText);
-            console.log(response);
             let updatedNasPrice = Object.assign({}, this.state.nasPrice);
-            console.log(updatedNasPrice);
             this.setState({
               nasPrice: {
                 ...this.state.nasPrice,
@@ -70,7 +68,6 @@ class InfoBar extends Component {
                 CNY: response.data.quotes.CNY.price
               }
             });
-            console.log(this.state.nasPrice);
           } else {
             console.error(xmlHttp.statusText);
           }
@@ -103,7 +100,7 @@ class InfoBar extends Component {
           this.setState({
             smartContractBalance: balance
           });
-          console.log(this.state.smartContractBalance)
+          console.log("Smart contract balance " + this.state.smartContractBalance)
         })
         .catch((err) => {
           console.error(err);

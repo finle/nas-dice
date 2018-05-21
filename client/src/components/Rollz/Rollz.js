@@ -174,9 +174,6 @@ class Rollz extends Component {
     let bet = this.state.betValue;
     let callFunction = "nasRoll";
     let callArgs = "[\"" + String(this.state.winValue + 1) + "\"]";
-    this.setState({
-      rolling: true
-    });
     if (this.props.webExtension) {
       nebPay.simulateCall(this.smartContract, bet, callFunction, callArgs, {
         listener: this.simulateNasRollCallBack
@@ -203,9 +200,6 @@ class Rollz extends Component {
             console.log(simulateResults);
             simulateResults["error"] = res.execute_err;
           }
-          this.setState({
-            rolling: false
-          });
           this.changeRollResults(simulateResults);
         })
         .catch((err) => {
@@ -228,21 +222,18 @@ class Rollz extends Component {
       console.log(simulateResults);
       simulateResults["error"] = res.execute_err;
     }
-    this.setState({
-      rolling: false
-    });
     this.changeRollResults(simulateResults);
     console.log(this.props.rollResults);
   };
 
   nasRollCallBack = (res) => {
     let txHash = res.txhash;
-    this.setState({
-      rolling: true
-    });
     let funcIntervalQuery = () => {
       neb.api.getTransactionReceipt({hash: txHash})
         .then(function(receipt) {
+          this.setState({
+            rolling: true
+          });
           console.log("Waiting to complete transaction...");
           if (receipt.status === 1) {
             console.log("final result: ", receipt);
@@ -258,6 +249,7 @@ class Rollz extends Component {
           }
         }.bind(this));
     };
+    funcIntervalQuery();
     let intervalQuery = setInterval(() => {
       funcIntervalQuery();
     }, 5000);
@@ -314,7 +306,6 @@ class Rollz extends Component {
       <RollzWrapper className="Rollz">
         <PaperStyled>
           <Heading>Place Dice Bets</Heading>
-
           <BetAmountStyled>
             <TextField
               label="Bet Amount"
