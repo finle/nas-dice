@@ -136,7 +136,7 @@ class InfoBar extends Component {
         <InfoWrapper>
           <NasPrice>NAS Price {this.state.nasPrice.USD} USD = {this.state.nasPrice.CNY} CNY</NasPrice>
           <SmartContract>
-            Smart contract address: <a target="_blank" href={"https://explorer.nebulas.io/#/address/" + this.props.smartContract}>n1ump1QJZS8JRcwXN7tYgMcEizSvwphYQo4</a>
+            Smart contract address: <a target="_blank" href={"https://explorer.nebulas.io/#/address/" + this.props.smartContract}>n1wmQbKbYvdTHFjNdemyJSbw6C12FCCN6yY</a>
           </SmartContract>
           <SmartContract>
             Current balance: {this.state.smartContractBalance} NAS
